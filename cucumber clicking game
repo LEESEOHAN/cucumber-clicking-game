@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>오이 클리커</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 20px;
+        }
+        #score {
+            font-size: 24px;
+            margin: 20px;
+        }
+        #clickButton {
+            font-size: 24px;
+            padding: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 20px;
+        }
+        #clickButton:hover {
+            background-color: #45a049;
+        }
+        .upgrade {
+            margin: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .upgrade:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>오이 클리커</h1>
+    <div id="score">오이: 0</div>
+    <div id="oiPerSecond">초당 오이: 0</div>
+    <button id="clickButton">오이 클릭!</button>
+    <div id="upgrades"></div>
+
+    <script>
+        let score = 0;
+        let oiPerSecond = 0;
+        let oiPerClick = 1;
+        
+        const upgrades = [
+            { name: "오이 수확기", cost: 10, effect: 0.1, isPerSecond: true },
+            { name: "오이 농장", cost: 50, effect: 0.5, isPerSecond: true },
+            { name: "오이 공장", cost: 200, effect: 2.0, isPerSecond: true },
+            { name: "클릭력 강화", cost: 100, effect: 1.0, isPerSecond: false }
+        ];
+
+        // 업그레이드 버튼 생성
+        upgrades.forEach(upgrade => {
+            const button = document.createElement('button');
+            button.className = 'upgrade';
+            button.textContent = `${upgrade.name} (${upgrade.cost})`;
+            button.onclick = () => buyUpgrade(upgrade);
+            document.getElementById('upgrades').appendChild(button);
+        });
+
+        // 클릭 이벤트
+        document.getElementById('clickButton').onclick = () => {
+            score += oiPerClick;
+            updateUI();
+        };
+
+        // 업그레이드 구매
+        function buyUpgrade(upgrade) {
+            if (score >= upgrade.cost) {
+                score -= upgrade.cost;
+                if (upgrade.isPerSecond) {
+                    oiPerSecond += upgrade.effect;
+                } else {
+                    oiPerClick += upgrade.effect;
+                }
+                upgrade.cost = Math.floor(upgrade.cost * 1.5);
+                updateUI();
+            }
+        }
+
+        // UI 업데이트
+        function updateUI() {
+            document.getElementById('score').textContent = `오이: ${Math.floor(score)}`;
+            document.getElementById('oiPerSecond').textContent = `초당 오이: ${oiPerSecond.toFixed(1)}`;
+            
+            // 업그레이드 버튼 상태 업데이트
+            const buttons = document.getElementsByClassName('upgrade');
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = score < upgrades[i].cost;
+                buttons[i].textContent = `${upgrades[i].name} (${upgrades[i].cost})`;
+            }
+        }
+
+        // 자동 생산
+        setInterval(() => {
+            score += oiPerSecond / 60;
+            updateUI();
+        }, 16);
+    </script>
+</body>
+</html>
